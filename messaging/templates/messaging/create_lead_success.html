@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Lead created</h1>
+  <p>Message ID: {{ message.id }}</p>
+  <p>Lead message:</p>
+  <pre>{{ message.lead_message }}</pre>
+  <p>Response message: {{ message.response_message }}</p>
+  <p>Response datetime: {{ message.response_datetime }}</p>
+  <a href="{% url 'messaging:create' %}">Create another</a>
+{% endblock %}

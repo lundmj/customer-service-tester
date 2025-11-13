@@ -1,0 +1,6 @@
+asgiref==3.10.0
+Django==5.2.8
+django-model-utils==5.0.0
+sqlparse==0.5.3
+agentics_lundmj==1.0.1
+python-dotenv==1.0.0

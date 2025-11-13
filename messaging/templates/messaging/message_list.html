@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Messages</h1>
+  <p><a href="{% url 'messaging:create' %}">Create new lead</a></p>
+  {% if messages %}
+    <ul>
+      {% for m in messages %}
+        <li style="margin-bottom:18px; padding:8px; border:1px solid #ddd">
+          <strong>Lead ({{ m.lead_datetime }}):</strong>
+          <pre>{{ m.lead_message }}</pre>
+          <form method="post" action="{% url 'messaging:reply' m.id %}">
+            {% csrf_token %}
+            <div>
+              <label for="reply_{{ forloop.counter }}">Your reply</label><br />
+              <textarea id="reply_{{ forloop.counter }}" name="response_message" rows="3" cols="60"></textarea>
+            </div>
+            <div style="margin-top:6px">
+              <button type="submit">Submit reply</button>
+            </div>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No unanswered messages.</p>
+  {% endif %}
+{% endblock %}

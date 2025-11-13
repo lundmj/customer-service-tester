@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block title %}Customer Service Tester{% endblock %}</title>
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin: 24px; }
+      header { margin-bottom: 18px; }
+      nav a { margin-right: 12px; color: #0b66ff; text-decoration: none }
+      .container { max-width: 900px; }
+      footer { margin-top: 28px; color: #666; font-size: 0.9rem }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>{% block header %}Customer Service Tester{% endblock %}</h1>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/messages/create-lead/">Create lead</a>
+          <a href="/admin/">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container">
+      <p>Generated UI for testing leads.</p>
+    </footer>
+  </body>
+</html>
