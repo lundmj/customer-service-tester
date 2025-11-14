@@ -4,6 +4,7 @@ from agentics_lundmj.tool_box import ToolBox
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.views.generic import ListView
 from .models import Message, MessageScorecard
 
 PROMPTS_PATH = Path(__file__).resolve().parent / "prompts"
@@ -37,15 +38,13 @@ class InitiateLead(View):
         }, status=201)
 
 
-class MessageList(View):
-    def get(self, request, *args, **kwargs):
-        """Show a list of created Message rows with a reply form for each."""
-        messages = Message.objects.exclude(
-            response_message__isnull=False
-        ).order_by('-lead_datetime')
-        return render(request, 'messaging/message_list.html', {
-            'messages': messages,
-        })
+class MessageList(ListView):
+    model = Message
+    template_name = 'messaging/message_list.html'
+    context_object_name = 'messages'
+    queryset = Message.objects.exclude(
+        response_message__isnull=False
+    ).order_by('-lead_datetime')
 
 
 class ReplyView(View):
