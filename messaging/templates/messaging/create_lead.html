@@ -1,13 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Create Lead (test)</h1>
-  <p>Provide a lead message to post; leave blank to let the agent generate one.</p>
   <form method="post" action="">
     {% csrf_token %}
-    <div>
-      <label for="lead_message">Lead message</label><br />
-      <textarea id="lead_message" name="lead_message" rows="6" cols="60"></textarea>
-    </div>
     <div style="margin-top:8px">
       <button type="submit">Create lead</button>
     </div>

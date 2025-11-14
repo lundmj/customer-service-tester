@@ -10,27 +10,21 @@ PROMPTS_PATH = Path(__file__).resolve().parent / "prompts"
 
 class InitiateLead(View):
     def get(self, request, *args, **kwargs):
-        """Render a simple form to POST a lead message for testing."""
         return render(request, 'messaging/create_lead.html')
 
     def post(self, request, *args, **kwargs):
-        # If the form provides a lead_message, use it; otherwise fall back
-        # to the agent-generated message so the endpoint remains useful.
-        lead_message = request.POST.get('lead_message', '').strip()
-
-        if not lead_message:
-            shopper = Agent(
-                PROMPTS_PATH / "property_shopper.md",
-                history_limit=1,
-                model_name='gpt-4.1',
-            )
-            lead_message = shopper.chat_once(
-                "Media: Facebook Marketplace\n"
-            )
+        shopper = Agent(
+            PROMPTS_PATH / "property_shopper.md",
+            history_limit=1,
+            model_name='gpt-4.1',
+        )
+        lead_message = shopper.chat_once(
+            "Media: Email\n"
+        )
 
         try:
             message = Message.objects.create(
-                type=Message.FACEBOOK,
+                type=Message.EMAIL,
                 lead_message=lead_message,
             )
         except Exception as e:
@@ -85,7 +79,6 @@ class ReplyView(View):
 
         Returns whether the report successfully generated.
         """
-        print('Tool Called')
         if not all(
             1 <= score <= 5 for score in [
                 platform_score,
@@ -127,8 +120,7 @@ class ReplyView(View):
         ReplyView.scorecard_id = scorecard.id
         return "Success: Grade report generated."
 
-    def grade_response(message, response_message):
-        print('Grading Response')
+    def grade_response(message_obj: Message, response_message: str):
         grader = Agent(
             PROMPTS_PATH / "response_grader.md",
             history_limit=2,
@@ -136,15 +128,16 @@ class ReplyView(View):
             tool_box=ReplyView.grade_toolbox
         )
         prompt = f"""
-        Lead Message: {message.lead_message}
-        Platform: {message.type}
+        Lead Message: {message_obj.lead_message}
+        Platform: {message_obj.type}
         Response Message: {response_message}
         """
         grader.chat_once(prompt)
-        message.scorecard_id = ReplyView.scorecard_id
+        print('ReplyView.scorecard_id:', ReplyView.scorecard_id)
+        message_obj.scorecard_id = ReplyView.scorecard_id
+        message_obj.save()
 
     def post(self, request: HttpRequest, pk, *args, **kwargs):
-        print('POST')
         message = get_object_or_404(Message, id=pk)
         response_message = request.POST.get('response_message', '').strip()
         if not response_message:
@@ -154,7 +147,6 @@ class ReplyView(View):
             message.log_response(response_message)
         except Exception as e:
             return HttpResponse(status=500, content=str(e))
-        print('Logged Response')
 
         ReplyView.grade_response(message, response_message)
 
