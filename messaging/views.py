@@ -46,10 +46,7 @@ class InitiateLead(View):
             return HttpResponse(status=500, content=str(e))
 
         # On success, render a tiny confirmation page showing the created id
-        return await sync_to_async(render)(request, 'messaging/create_lead_success.html', {
-            'message': message,
-            'message_id': message.id,
-        }, status=201)
+        return redirect('messaging:list')
 
 
 class MessageList(ListView):
