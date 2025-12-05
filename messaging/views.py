@@ -3,35 +3,26 @@ import asyncio
 from agentics_lundmj.agent import Agent
 from agentics_lundmj.tool_box import ToolBox
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.views import View
 from django.views.generic import ListView
-from asgiref.sync import sync_to_async
 import uuid
 from .models import Message, MessageScorecard
 
 PROMPTS_PATH = Path(__file__).resolve().parent / "prompts"
 
 class InitiateLead(View):
-    async def get(self, request, *args, **kwargs):
-        # Use sync_to_async to call Django's render from an async view.
-        return await sync_to_async(render)(request, 'messaging/create_lead.html')
-
     async def post(self, request, *args, **kwargs):
-        # If a lead_message is supplied via the form use it, otherwise
-        # call the agent in a thread so we don't block the event loop.
-        lead_message = request.POST.get('lead_message', '').strip()
 
-        if not lead_message:
-            def call_agent():
-                shopper = Agent(
-                    PROMPTS_PATH / "property_shopper.md",
-                    history_limit=1,
-                    model_name='gpt-4.1',
-                )
-                return shopper.chat_once("Media: Email\n")
+        def call_agent():
+            shopper = Agent(
+                PROMPTS_PATH / "property_shopper.md",
+                history_limit=1,
+                model_name='gpt-4.1',
+            )
+            return shopper.chat_once("Media: Email\n")
 
-            lead_message = await asyncio.to_thread(call_agent)
+        lead_message = await asyncio.to_thread(call_agent)
 
         try:
             # run ORM creation in a thread
@@ -45,7 +36,6 @@ class InitiateLead(View):
         except Exception as e:
             return HttpResponse(status=500, content=str(e))
 
-        # On success, render a tiny confirmation page showing the created id
         return redirect('messaging:list')
 
 

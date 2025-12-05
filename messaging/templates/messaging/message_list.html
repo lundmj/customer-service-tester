@@ -1,18 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>Messages</h1>
-  <p><a href="{% url 'messaging:create' %}">Create new lead</a></p>
+  <form method="post" action="{% url 'messaging:create' %}">
+    {% csrf_token %}
+    <button type="submit">Create new lead</button>
+  </form>
   {% if messages %}
-    <ul>
+    <ul style="list-style: none; padding: 0;">
       {% for m in messages %}
-        <li style="margin-bottom:18px; padding:8px; border:1px solid #ddd">
+        <li class="message-item">
           <strong>Lead ({{ m.lead_datetime }}):</strong>
           <pre>{{ m.lead_message }}</pre>
+
+          {% if m.response_message %}
+            <strong>Response:</strong>
+            <pre>{{ m.response_message }}</pre>
+            <div>At: {{ m.response_datetime }}</div>
+          {% else %}
+            <em>No response yet</em>
+          {% endif %}
+
+          <!-- Reply form (always from the user) -->
           <form method="post" action="{% url 'messaging:reply' m.id %}">
             {% csrf_token %}
             <div>
-              <label for="reply_{{ forloop.counter }}">Your reply</label><br />
-              <textarea id="reply_{{ forloop.counter }}" name="response_message" rows="3" cols="60"></textarea>
+              <label for="reply_{{ forloop.counter }}">Your reply</label>
+              <textarea id="reply_{{ forloop.counter }}" name="response_message" rows="3"></textarea>
             </div>
             <div style="margin-top:6px">
               <button type="submit">Submit reply</button>
